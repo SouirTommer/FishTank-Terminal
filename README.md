@@ -1,5 +1,7 @@
 # Terminal Fish Tank
 
+<img width="1080" height="557" alt="image" src="https://github.com/user-attachments/assets/05d00440-fd28-4b70-be88-5333f4641738" />
+
 An interactive fish-feeding game in your terminal (cmd / Windows Terminal / macOS Terminal). Pure Python stdlib, zero dependencies.
 
 ## Run
