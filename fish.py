@@ -22,7 +22,10 @@ BUBBLE = 51
 FOODC = 226
 SANDC = 238
 FISH_COLORS = (196, 51, 214, 226, 45, 208)
-FISH_NAMES = ('Bubbles', 'Fin', 'Nemo', 'Coral', 'Pearl', 'Marlin')
+FISH_NAMES = ('Bubbles', 'Fin', 'Nemo', 'Coral', 'Pearl', 'Marlin',
+              'Dory', 'Flipper', 'Splash', 'Wanda', 'Sushi', 'Jaws',
+              'Goldie', 'Poseidon', 'Neptune', 'Kraken', 'Salmon',
+              'Triton', 'Caspian', 'Gill')
 PALETTES = (
     (BORDER, SANDC, PLANT, BUBBLE, FOODC),
     (24, 110, 29, 81, 220),
@@ -42,6 +45,9 @@ class Fish:
         self.color = color
         self.name = name
         self.eaten = 0
+        self.speed = random.uniform(0.8, 1.3)
+        self.greed = random.uniform(0.5, 1.0)
+        self.hist = []
         self.face = 1 if vx >= 0 else -1
 
     def sprite(self):
@@ -56,10 +62,10 @@ class Fish:
             dx = target.x - self.x
             dy = target.y - self.y
             d = math.hypot(dx, dy)
-            if d < 15:
-                speed = 0.6
-                self.vx += (dx / d * speed - self.vx) * 0.2
-                self.vy += (dy / d * speed - self.vy) * 0.2
+            if d < 15 / self.greed:
+                speed = 0.6 * self.speed
+                self.vx += (dx / d * speed - self.vx) * 0.2 * self.greed
+                self.vy += (dy / d * speed - self.vy) * 0.2 * self.greed
         else:
             if random.random() < 0.01:
                 self.vx = -self.vx
@@ -81,6 +87,8 @@ class Fish:
             self.y = game.H - 3.5
             self.vy = -abs(self.vy)
         self.face = 1 if self.vx > 0 else -1
+        self.hist.append((self.x, self.y))
+        self.hist = self.hist[-3:]
 
 
 class Bubble:
@@ -123,6 +131,7 @@ class Game:
         self.running = True
         self.show_bubbles = True
         self.show_names = True
+        self.auto = False
         self.pal = 0
         self.hungry = HUNGRY_MAX
         self.death_msg = 0.0
@@ -162,6 +171,8 @@ class Game:
                 self.show_names = not self.show_names
             elif ch in (b't', b'T'):
                 self.pal = (self.pal + 1) % len(PALETTES)
+            elif ch in (b'v', b'V'):
+                self.auto = not self.auto
             elif ch == b' ':
                 self.drop_food()
             elif ch in (b'+', b'='):
@@ -219,12 +230,16 @@ class Game:
                     self.bubbles = self.bubbles[-MAX_BUBBLE:]
                     break
 
-        self.hungry -= HUNGRY_DRAIN
-        if self.hungry <= 0:
-            if self.fishes:
-                self.fishes.pop()
-                self.death_msg = 3.0
-            self.hungry = HUNGRY_MAX
+        if self.auto:
+            if len(self.foods) < 4:
+                self.drop_food()
+        else:
+            self.hungry -= HUNGRY_DRAIN
+            if self.hungry <= 0:
+                if self.fishes:
+                    self.fishes.pop()
+                    self.death_msg = 3.0
+                self.hungry = HUNGRY_MAX
         if self.death_msg > 0:
             self.death_msg -= TICK
 
@@ -250,6 +265,8 @@ class Game:
         grid = [[(' ', None, False)] * W for _ in range(H)]
 
         text = 'FISH TANK | SCORE:%d | TIME:%s' % (self.score, self.mmss())
+        if self.auto:
+            text = 'WATCH | ' + text
         if self.death_msg > 0:
             text += ' | A fish died!'
         for i, ch in enumerate(text[:W]):
@@ -284,6 +301,12 @@ class Game:
             grid[int(round(fo.y))][int(round(fo.x))] = ('*', fcol, False)
 
         for f in self.fishes:
+            for k, (hx, hy) in enumerate(f.hist[:-1]):
+                row = int(round(hy))
+                gx = int(round(hx))
+                if 3 <= row <= self.H - 3 and 1 <= gx <= self.W - 2:
+                    grid[row][gx] = ('.', 232 + k * 3, False)
+        for f in self.fishes:
             self.draw_fish(grid, f)
 
         if self.show_names:
@@ -298,7 +321,7 @@ class Game:
                             grid[row][gx] = (ch, 250, False)
 
         n = int(self.hungry / HUNGRY_MAX * 10)
-        controls = '[SPC]feed [+]/-fish [N]names [C]bub [T]theme  HUNGRY:%s' % (
+        controls = '[SPC]feed [+]/-fish [N]names [C]bub [T]theme [V]watch  HUNGRY:%s' % (
             '#' * n + '-' * (10 - n))
         for i, ch in enumerate(controls[:W]):
             grid[2][i] = (ch, 250, False)

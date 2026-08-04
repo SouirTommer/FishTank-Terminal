@@ -17,10 +17,15 @@ python fish.py
 - `C` toggle bubbles
 - `+` / `-` add / remove fish
 - `T` cycle color theme
+- `V` watch mode (auto-feed, fish never die)
 - `ESC` quit
 
 ## Gameplay
 
-Fish actively chase food. Each pellet eaten scores 1 point and feeds the tank. The tank-wide hunger meter drains over time — keep feeding, or when it empties a fish dies and the meter refills. Six named AI fish of different colors and sizes swim on their own; bubbles rise, seaweed sways, and gravel lines the bottom.
+Fish actively chase food, each with its own speed and appetite. Each pellet eaten scores 1 point and feeds the tank. The tank-wide hunger meter drains over time — keep feeding, or when it empties a fish dies and the meter refills. Named AI fish of different colors and sizes swim on their own, leaving faint trails; bubbles rise, seaweed sways, and gravel lines the bottom. Watch mode (`V`) auto-feeds the tank so you can just sit back and watch.
 
 > Make sure the terminal window is at least 30x12.
+
+## Troubleshooting
+
+- **Keys stop working after switching to a Chinese IME** — the game reads raw console keys, so a Chinese-mode IME swallows them for text composition (Space commits the composition, letters are pinyin). Switch the IME back to English/ASCII mode (e.g. `Ctrl+Space` or the `中/英` toggle) before playing; if a stuck composition persists, press `Ctrl+Space` or click into the window once.
