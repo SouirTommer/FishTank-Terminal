@@ -35,15 +35,17 @@ PALETTES = (
 HUNGRY_MAX = 100
 HUNGRY_DRAIN = 0.06
 HUNGRY_FEED = 15
+GUARDIAN_CHANCE = 0.01
 
 
 class Fish:
-    def __init__(self, x, y, vx, vy, size, color, name):
+    def __init__(self, x, y, vx, vy, size, color, name, guardian=False):
         self.x, self.y = x, y
         self.vx, self.vy = vx, vy
         self.size = size
         self.color = color
         self.name = name
+        self.guardian = guardian
         self.eaten = 0
         self.speed = random.uniform(0.8, 1.3)
         self.greed = random.uniform(0.5, 1.0)
@@ -51,6 +53,8 @@ class Fish:
         self.face = 1 if vx >= 0 else -1
 
     def sprite(self):
+        if self.guardian:
+            return '<[═══]>'
         n = 2 + self.size
         if self.face > 0:
             return '><' + '(' * n + "'" + '>'
@@ -134,7 +138,8 @@ class Game:
         self.auto = False
         self.pal = 0
         self.hungry = HUNGRY_MAX
-        self.death_msg = 0.0
+        self.msg_t = 0.0
+        self.msg = ''
         self.bubbles = []
         self.foods = []
         self.fishes = []
@@ -186,6 +191,18 @@ class Game:
 
     def add_fish(self):
         i = len(self.fishes)
+        if random.random() < GUARDIAN_CHANCE:
+            g = Fish(random.uniform(6, self.W - 8),
+                     random.uniform(3, self.H - 5),
+                     0.0, 0.0, 0, 86, 'Guardian', True)
+            self.fishes.append(g)
+            others = [f for f in self.fishes if f is not g]
+            if others:
+                victim = random.choice(others)
+                self.fishes.remove(victim)
+                self.msg_t = 3.0
+                self.msg = 'Guardian ate %s!' % victim.name
+            return
         vx = 0.35 if i % 2 == 0 else -0.35
         self.fishes.append(Fish(random.uniform(6, self.W - 8),
                                 random.uniform(3, self.H - 5),
@@ -236,12 +253,13 @@ class Game:
         else:
             self.hungry -= HUNGRY_DRAIN
             if self.hungry <= 0:
+                self.hungry = HUNGRY_MAX
                 if self.fishes:
                     self.fishes.pop()
-                    self.death_msg = 3.0
-                self.hungry = HUNGRY_MAX
-        if self.death_msg > 0:
-            self.death_msg -= TICK
+                    self.msg_t = 3.0
+                    self.msg = 'A fish died!'
+        if self.msg_t > 0:
+            self.msg_t -= TICK
 
     def run(self):
         last = time.monotonic()
@@ -267,8 +285,8 @@ class Game:
         text = 'FISH TANK | SCORE:%d | TIME:%s' % (self.score, self.mmss())
         if self.auto:
             text = 'WATCH | ' + text
-        if self.death_msg > 0:
-            text += ' | A fish died!'
+        if self.msg_t > 0:
+            text += ' | ' + self.msg
         for i, ch in enumerate(text[:W]):
             grid[0][i] = (ch, 0, True)
 

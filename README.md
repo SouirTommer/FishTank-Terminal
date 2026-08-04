@@ -22,7 +22,7 @@ python fish.py
 
 ## Gameplay
 
-Fish actively chase food, each with its own speed and appetite. Each pellet eaten scores 1 point and feeds the tank. The tank-wide hunger meter drains over time — keep feeding, or when it empties a fish dies and the meter refills. Named AI fish of different colors and sizes swim on their own, leaving faint trails; bubbles rise, seaweed sways, and gravel lines the bottom. Watch mode (`V`) auto-feeds the tank so you can just sit back and watch.
+Fish actively chase food, each with its own speed and appetite. Each pellet eaten scores 1 point and feeds the tank. The tank-wide hunger meter drains over time — keep feeding, or when it empties a fish dies and the meter refills. Named AI fish of different colors and sizes swim on their own, leaving faint trails; bubbles rise, seaweed sways, and gravel lines the bottom. Watch mode (`V`) auto-feeds the tank so you can just sit back and watch. Adding a fish with `+` has a 1% chance of summoning a Minecraft Guardian instead — it eats one of your fish (it tells you who), then swims around like any other fish.
 
 > Make sure the terminal window is at least 30x12.
 
